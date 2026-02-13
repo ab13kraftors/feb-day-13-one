@@ -1,0 +1,179 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  min-height: 100vh;
+}
+
+/* Layout */
+
+.app-wrapper {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;   /* horizontal */
+  align-items: center;       /* vertical */
+  padding: 20px;
+}
+
+.card-with-logout {
+  position: relative;
+  width: 350px;
+  min-height: 500px;
+}
+
+.logout-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #ff5e5e;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.logout-btn:hover {
+  background: #e04a4a;
+}
+
+.logged-in-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+
+.logout-btn:hover {
+  background: #e04a4a;
+}
+
+/* Card Style */
+.todo-card,
+.auth-card {
+  width: 100%;
+  max-width: 380px;   /* 👈 critical */
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Headings */
+h2 {
+  margin-top: 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Form */
+.task-form,
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+input,
+textarea {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Buttons */
+button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.add-button {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.add-button:hover {
+  transform: translateY(-2px);
+}
+
+.edit-btn {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.delete-btn {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.edit-btn:hover,
+.delete-btn:hover {
+  transform: scale(1.05);
+}
+
+/* Task List */
+.task-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.task-item {
+  padding: 15px;
+  border-radius: 14px;
+  background: #f9fafc;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+}
+
+.task-item:hover {
+  background: #eef1ff;
+}
+
+.task-text h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.task-text p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.task-btns {
+  display: flex;
+  gap: 8px;
+}
+
+/* Auth specific */
+.auth-card hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #eee;
+}
