@@ -12,6 +12,7 @@ interface Tasks {
 export default function TaskManager({ session }: { session: Session }) {
   const [newTask, setNewTask] = useState({ title: "", description: "" });
   const [tasks, setTasks] = useState<Tasks[]>([]);
+  const [taskImage, setTaskImage] = useState<File | null>(null);
 
   const fetchTasks = async () => {
     const { data, error } = await supabase
@@ -33,11 +34,49 @@ export default function TaskManager({ session }: { session: Session }) {
     }
   }, [session]);
 
+  // Subscriptions Realtime
+  useEffect(() => {
+    const channel = supabase.channel("tasks-channel");
+    channel
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "tasks" },
+        (payload) => {
+          const newTask = payload.new as Tasks;
+          setTasks((prev) => {
+            if (prev.find((t) => t.id === newTask.id)) return prev;
+            return [newTask, ...prev];
+          });
+        },
+      )
+      .subscribe((status) => {
+        console.log("Subscription status:", status);
+      });
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const fileUniqueName = `${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage
+      .from("tasks-images")
+      .upload(fileUniqueName, file);
+    if (error) {
+      console.error("Error uploading image:", error.message);
+      return null;
+    }
+    const { data } = await supabase.storage
+      .from("tasks-images")
+      .getPublicUrl(fileUniqueName);
+    return data.publicUrl;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!newTask.title || !newTask.description) {
-      alert("Please fill in both title and description.");
+    if (!newTask.title || !newTask.description || !taskImage) {
+      alert("Please fill in both title and description, and select an image.");
       return;
     }
 
@@ -48,20 +87,39 @@ export default function TaskManager({ session }: { session: Session }) {
       return;
     }
 
+    let imageUrl: string | null = null;
+    if (taskImage) {
+      imageUrl = await uploadImage(taskImage);
+    }
+    if (!imageUrl) {
+      alert("Image upload failed. Please try again.");
+      return;
+    }
+
     const { error } = await supabase
       .from("tasks")
       .insert({
         ...newTask,
         email: userEmail,
+        image_url: imageUrl,
       })
+      .select()
       .single();
+
     if (error) {
       console.error("Encounter an error", error.message);
     } else {
       sendNotificationToUser(userEmail, newTask.title, newTask.description);
 
       setNewTask({ title: "", description: "" });
+      setTaskImage(null);
       fetchTasks();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setTaskImage(e.target.files[0]);
     }
   };
 
@@ -122,16 +180,16 @@ export default function TaskManager({ session }: { session: Session }) {
     }
   };
 
-  useEffect(() => {
-    const channel = supabase.channel("tasks-channel");
-    channel.on(
-      "postgres_changes", 
-      {event:"INSERT", schema:"public", table:"tasks"},
-      (payload) =>{
-        
-      }
-    )
-  })
+  // useEffect(() => {
+  //   const channel = supabase.channel("tasks-channel");
+  //   channel.on(
+  //     "postgres_changes",
+  //     {event:"INSERT", schema:"public", table:"tasks"},
+  //     (payload) =>{
+
+  //     }
+  //   )
+  // })
   return (
     <>
       <h2>Task Manager</h2>
@@ -152,6 +210,12 @@ export default function TaskManager({ session }: { session: Session }) {
           onChange={(e) =>
             setNewTask((prev) => ({ ...prev, description: e.target.value }))
           }
+        />
+        <input
+          type="file"
+          accept="image/*"
+          placeholder="Tasks Image URL < 1MB"
+          onChange={handleFileChange}
         />
 
         <button type="submit" className="add-button">
